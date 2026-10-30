@@ -1,0 +1,13 @@
+{
+  "name": "mmm-weatherstrip",
+  "version": "1.0.0",
+  "description": "MagicMirror module showing the week ahead as one row: highs, lows and rain, with hourly sky, temperature and rain charts behind them. Data from Open-Meteo.",
+  "main": "MMM-WeatherStrip.js",
+  "author": "AndyHazz",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AndyHazz/MMM-WeatherStrip.git"
+  },
+  "keywords": ["magicmirror", "magicmirror2", "weather", "forecast", "open-meteo"]
+}

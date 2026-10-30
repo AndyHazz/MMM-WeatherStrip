@@ -1,0 +1,137 @@
+/* Colours: override any of these in custom.css, e.g. `.weatherstrip { --weatherstrip-rain: #4fc3f7; }` */
+.weatherstrip {
+  --weatherstrip-day: #ffd36b;
+  --weatherstrip-day-opacity: 0.45;
+  --weatherstrip-twilight: #f08a5d;
+  --weatherstrip-twilight-opacity: 0.55;
+  --weatherstrip-night: #1d3577;
+  --weatherstrip-night-opacity: 0.75;
+  --weatherstrip-sun: #ffe9a8;
+  --weatherstrip-star: #fff;
+  --weatherstrip-cloud: #404040;
+  --weatherstrip-line: #e6e6e6;
+  --weatherstrip-warmer: #d9663f;
+  --weatherstrip-colder: #3f7fd9;
+  --weatherstrip-rain: #6cb4ff;
+  --weatherstrip-divider: #333;
+
+  /* Lane heights are set from the module config. */
+  --cloud-lane: 14px;
+  --rain-lane: 18px;
+
+  display: grid;
+  position: relative;
+  width: 100%;
+  padding: var(--cloud-lane) 0 var(--rain-lane);
+  border-bottom: 1px solid var(--weatherstrip-divider);
+  text-align: center;
+}
+
+.weatherstrip-day {
+  position: relative;
+  border-left: 1px solid var(--weatherstrip-divider);
+  line-height: 1.3;
+  text-shadow: 0 0 4px #000, 0 0 2px #000; /* keeps the numbers readable where the chart passes behind */
+}
+
+.weatherstrip-day:first-child {
+  border-left: none;
+}
+
+.weatherstrip-name {
+  text-transform: uppercase;
+}
+
+.weatherstrip-rain.wet {
+  color: var(--weatherstrip-rain);
+}
+
+.weatherstrip-layer {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.weatherstrip-clouds {
+  top: 0;
+  height: var(--cloud-lane);
+}
+
+.weatherstrip-temp {
+  top: var(--cloud-lane);
+  height: calc(100% - var(--cloud-lane) - var(--rain-lane));
+}
+
+.weatherstrip-rainlane {
+  bottom: 0;
+  height: var(--rain-lane);
+}
+
+.weatherstrip-nowlayer {
+  top: 0;
+  height: 100%;
+}
+
+.weatherstrip-sky-day {
+  fill: var(--weatherstrip-day);
+  fill-opacity: var(--weatherstrip-day-opacity);
+}
+
+.weatherstrip-sky-night {
+  fill: var(--weatherstrip-night);
+  fill-opacity: var(--weatherstrip-night-opacity);
+}
+
+/* Solid, so clouds hide the sky behind them. */
+.weatherstrip-cloud {
+  fill: var(--weatherstrip-cloud);
+}
+
+.weatherstrip-stars {
+  fill: var(--weatherstrip-star);
+}
+
+/* Pale noon sun, brighter than the daylight band so it can peek between clouds. */
+.weatherstrip-sun-disc {
+  fill: var(--weatherstrip-sun);
+  opacity: 0.75;
+}
+
+.weatherstrip-colder {
+  fill: var(--weatherstrip-colder);
+  fill-opacity: 0.4;
+}
+
+.weatherstrip-warmer {
+  fill: var(--weatherstrip-warmer);
+  fill-opacity: 0.4;
+}
+
+.weatherstrip-templine {
+  fill: none;
+  stroke: var(--weatherstrip-line);
+  stroke-opacity: 0.3;
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.weatherstrip-rainbar {
+  fill: var(--weatherstrip-rain);
+  fill-opacity: 0.5;
+}
+
+.weatherstrip-now {
+  stroke: var(--weatherstrip-line);
+  stroke-opacity: 0.5;
+  stroke-width: 1px;
+  stroke-dasharray: 2px 3px; /* dotted, so it doesn't read as another day divider */
+  vector-effect: non-scaling-stroke;
+}
+
+/* Fetch failing: keep the last forecast but make it obvious it isn't current. */
+.weatherstrip.stale {
+  opacity: 0.5;
+}
