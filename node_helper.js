@@ -1,10 +1,13 @@
 const NodeHelper = require("node_helper");
 const Log = require("logger");
+const fs = require("fs");
+const path = require("path");
 
 module.exports = NodeHelper.create({
 	start () {
 		this.timers = {};
 		this.latest = {};
+		this.failures = {};
 	},
 
 	socketNotificationReceived (notification, payload) {
@@ -13,8 +16,40 @@ module.exports = NodeHelper.create({
 		// A page reload reconnects the frontend; resend what we have instead of waiting for the next fetch.
 		if (this.latest[id]) this.sendSocketNotification("WEATHERSTRIP_DATA", this.latest[id]);
 		if (this.timers[id]) return;
+		// After a restart, show the last forecast we saved until a fetch succeeds,
+		// rather than nothing if the forecast service happens to be down.
+		const saved = this.readSaved(config);
+		if (saved && !this.latest[id]) this.sendSocketNotification("WEATHERSTRIP_DATA", { ...saved, id });
 		this.fetchForecast(id, config);
-		this.timers[id] = setInterval(() => this.fetchForecast(id, config), config.updateInterval);
+	},
+
+	savedFile (config) {
+		return path.join(this.path, ".cache", `${config.lat}_${config.lon}.json`);
+	},
+
+	readSaved (config) {
+		try {
+			return JSON.parse(fs.readFileSync(this.savedFile(config), "utf8"));
+		} catch {
+			return null;
+		}
+	},
+
+	save (config, data) {
+		try {
+			fs.mkdirSync(path.dirname(this.savedFile(config)), { recursive: true });
+			fs.writeFileSync(this.savedFile(config), JSON.stringify(data));
+		} catch (err) {
+			Log.error(`[MMM-WeatherStrip] couldn't save the forecast: ${err.message}`);
+		}
+	},
+
+	// Next fetch: the normal interval after a success; after a failure, 2 minutes, doubling each
+	// time it fails again, up to the normal interval.
+	schedule (id, config, ok) {
+		this.failures[id] = ok ? 0 : (this.failures[id] || 0) + 1;
+		const wait = ok ? config.updateInterval : Math.min(config.updateInterval, 2 * 60 * 1000 * 2 ** (this.failures[id] - 1));
+		this.timers[id] = setTimeout(() => this.fetchForecast(id, config), wait);
 	},
 
 	async fetchForecast (id, config) {
@@ -45,11 +80,16 @@ module.exports = NodeHelper.create({
 				rain: hourly.precipitation[i],
 				cloud: hourly.cloud_cover[i]
 			}));
+			if (this.failures[id]) Log.log("[MMM-WeatherStrip] forecast fetched again");
 			this.latest[id] = { id, days, hours };
+			this.save(config, { days, hours });
 			this.sendSocketNotification("WEATHERSTRIP_DATA", this.latest[id]);
+			this.schedule(id, config, true);
 		} catch (err) {
-			Log.error(`[MMM-WeatherStrip] ${err.message}`);
+			// Logged once when it starts failing, not on every retry.
+			if (!this.failures[id]) Log.error(`[MMM-WeatherStrip] ${err.message}`);
 			this.sendSocketNotification("WEATHERSTRIP_ERROR", { id, message: err.message });
+			this.schedule(id, config, false);
 		}
 	}
 });
