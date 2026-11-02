@@ -23,22 +23,29 @@ module.exports = NodeHelper.create({
 		this.fetchForecast(id, config);
 	},
 
+	// Named from the coordinates as numbers only, so no config value can point it elsewhere.
 	savedFile (config) {
-		return path.join(this.path, ".cache", `${config.lat}_${config.lon}.json`);
+		const [lat, lon] = [config.lat, config.lon].map(Number);
+		if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+		return path.join(this.path, ".cache", `${lat.toFixed(4)}_${lon.toFixed(4)}.json`);
 	},
 
 	readSaved (config) {
+		const file = this.savedFile(config);
+		if (!file) return null;
 		try {
-			return JSON.parse(fs.readFileSync(this.savedFile(config), "utf8"));
+			return JSON.parse(fs.readFileSync(file, "utf8"));
 		} catch {
 			return null;
 		}
 	},
 
 	save (config, data) {
+		const file = this.savedFile(config);
+		if (!file) return;
 		try {
-			fs.mkdirSync(path.dirname(this.savedFile(config)), { recursive: true });
-			fs.writeFileSync(this.savedFile(config), JSON.stringify(data));
+			fs.mkdirSync(path.dirname(file), { recursive: true });
+			fs.writeFileSync(file, JSON.stringify(data));
 		} catch (err) {
 			Log.error(`[MMM-WeatherStrip] couldn't save the forecast: ${err.message}`);
 		}
