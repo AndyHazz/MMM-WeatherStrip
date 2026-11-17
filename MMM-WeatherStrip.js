@@ -60,6 +60,20 @@ Module.register("MMM-WeatherStrip", {
 		return `${Math.round(this.imperial() ? (c * 9) / 5 + 32 : c)}°`;
 	},
 
+	// Mostly snow: at least half the precipitation falling as snow. Open-Meteo gives snowfall in
+	// cm of snow and precipitation in mm of water; 7 cm of snow is about 10 mm of water.
+	snowy (rainMm, snowCm) {
+		return snowCm > 0 && (snowCm * 10) / 7 >= rainMm / 2;
+	},
+
+	formatSnow (cm) {
+		if (this.imperial()) {
+			const inches = cm / 2.54;
+			return `${inches < 1 ? inches.toFixed(1) : Math.round(inches)}in`;
+		}
+		return `${cm < 1 ? cm.toFixed(1) : Math.round(cm)}cm`;
+	},
+
 	formatRain (mm) {
 		if (this.imperial()) {
 			const inches = mm / 25.4;
@@ -247,14 +261,15 @@ Module.register("MMM-WeatherStrip", {
 		return temp;
 	},
 
-	// Rain: hourly bars rising from the bottom of the rain lane.
+	// Rain: hourly bars rising from the bottom of the rain lane (white where it's mostly snow).
 	buildRain (points, width) {
 		const rain = this.svgLayer("weatherstrip-rainlane", width);
 		const rainMax = Math.max(this.config.rainScaleMin, ...points.map((h) => h.rain || 0));
 		for (const h of points) {
 			if (!h.rain) continue;
 			const height = Math.max(8, (Math.min(h.rain, rainMax) / rainMax) * 100);
-			rain.appendChild(this.svgEl("rect", { class: "weatherstrip-rainbar", x: h.x + 0.15, width: 0.7, y: 100 - height, height }));
+			const cls = `weatherstrip-rainbar${this.snowy(h.rain, h.snow) ? " snow" : ""}`;
+			rain.appendChild(this.svgEl("rect", { class: cls, x: h.x + 0.15, width: 0.7, y: 100 - height, height }));
 		}
 		return rain;
 	},
@@ -332,14 +347,16 @@ Module.register("MMM-WeatherStrip", {
 
 			const name = day.date === today ? this.translate("TODAY") : moment(day.date).format("ddd");
 			const wet = day.rain >= this.config.wetThreshold;
+			// A mostly-snowy day shows a snowflake and how much snow, rather than a drop and mm of water.
+			const snow = this.snowy(day.rain, day.snow);
 			cell.innerHTML = `
 				<div class="weatherstrip-name xsmall dimmed">${name}</div>
 				<div class="weatherstrip-temps small">
 					<span class="bright">${this.formatTemp(day.high)}</span>
 					<span class="dimmed">${this.formatTemp(day.low)}</span>
 				</div>
-				<div class="weatherstrip-rain xsmall ${wet ? "wet" : "dimmed"}">
-					<i class="fa-solid fa-droplet"></i> ${this.formatRain(day.rain)}
+				<div class="weatherstrip-rain xsmall ${wet ? (snow ? "wet snow" : "wet") : "dimmed"}">
+					<i class="fa-solid fa-${snow ? "snowflake" : "droplet"}"></i> ${snow ? this.formatSnow(day.snow) : this.formatRain(day.rain)}
 				</div>`;
 			wrapper.appendChild(cell);
 		}

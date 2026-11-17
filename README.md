@@ -8,7 +8,7 @@ Behind the numbers:
 
 - **Sky** along the top: gold by day, a coral blend at dusk and dawn, deep blue with stars at night, and a pale sun at midday. Cloud cover hangs over it as solid puffs, so clear spells show sunshine or stars between them.
 - **Temperature** as a line across the week, shaded blue where it's colder than the same hour the day before and red where it's warmer.
-- **Rain** as hourly bars along the bottom.
+- **Rain** as hourly bars along the bottom, white where it's mostly snow. A mostly snowy day shows a snowflake and its snowfall in cm instead of a drop and mm of rain.
 - A dotted line marks **now**.
 
 ![Close-up of the sky lane](img/sky-detail.png)
@@ -85,6 +85,7 @@ Colours are CSS variables, so you can change them in `css/custom.css` without ed
 | `--weatherstrip-warmer` | `#d9663f` | Warmer than the day before |
 | `--weatherstrip-colder` | `#3f7fd9` | Colder than the day before |
 | `--weatherstrip-rain` | `#6cb4ff` | Rain bars and wet days' totals |
+| `--weatherstrip-snow` | `#fff` | Snow bars and snowy days' totals |
 | `--weatherstrip-divider` | `#333` | Lines between days and along the bottom |
 
 ## Running it edge to edge

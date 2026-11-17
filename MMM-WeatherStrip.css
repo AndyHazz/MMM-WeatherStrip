@@ -13,6 +13,7 @@
   --weatherstrip-warmer: #d9663f;
   --weatherstrip-colder: #3f7fd9;
   --weatherstrip-rain: #6cb4ff;
+  --weatherstrip-snow: #fff;
   --weatherstrip-divider: #333;
 
   /* Lane heights are set from the module config. */
@@ -47,6 +48,10 @@
 
 .weatherstrip-rain.wet {
   color: var(--weatherstrip-rain);
+}
+
+.weatherstrip-rain.wet.snow {
+  color: var(--weatherstrip-snow);
 }
 
 .weatherstrip-layer {
@@ -124,6 +129,12 @@
 .weatherstrip-rainbar {
   fill: var(--weatherstrip-rain);
   fill-opacity: 0.5;
+}
+
+/* More opaque than rain, so the white reads as white rather than grey. */
+.weatherstrip-rainbar.snow {
+  fill: var(--weatherstrip-snow);
+  fill-opacity: 0.85;
 }
 
 .weatherstrip-now {

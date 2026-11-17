@@ -63,8 +63,8 @@ module.exports = NodeHelper.create({
 		const params = new URLSearchParams({
 			latitude: config.lat,
 			longitude: config.lon,
-			daily: "temperature_2m_max,temperature_2m_min,precipitation_sum,sunrise,sunset",
-			hourly: "temperature_2m,precipitation,cloud_cover",
+			daily: "temperature_2m_max,temperature_2m_min,precipitation_sum,snowfall_sum,sunrise,sunset",
+			hourly: "temperature_2m,precipitation,snowfall,cloud_cover",
 			timezone: config.timezone,
 			past_days: "1", // yesterday's high, for today's warmer/cooler indicator
 			forecast_days: String(config.days + 1) // one spare so a stale fetch still fills the strip after midnight
@@ -78,6 +78,7 @@ module.exports = NodeHelper.create({
 				high: daily.temperature_2m_max[i],
 				low: daily.temperature_2m_min[i],
 				rain: daily.precipitation_sum[i],
+				snow: daily.snowfall_sum[i],
 				sunrise: daily.sunrise[i],
 				sunset: daily.sunset[i]
 			}));
@@ -85,6 +86,7 @@ module.exports = NodeHelper.create({
 				time,
 				temp: hourly.temperature_2m[i],
 				rain: hourly.precipitation[i],
+				snow: hourly.snowfall[i],
 				cloud: hourly.cloud_cover[i]
 			}));
 			if (this.failures[id]) Log.log("[MMM-WeatherStrip] forecast fetched again");
